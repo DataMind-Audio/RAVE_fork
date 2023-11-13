@@ -29,9 +29,16 @@ class RandomSpeed(transforms.Transform):
         """
         self.semitones = semitones
     def __call__(self, x: np.ndarray):
-        rate = 2 ** ((random()*2-1) * self.semitones / 12)
+        # Only 50% of the time:
+        if np.random.randint(2):
+            # calculate the rate of exactly +/- 1 semitone 
+            rate = 2 ** ((np.random.randint(2)*2-1) * self.semitones / 12)
+            # resample x
+            x = resampy.resample(x, rate, 1, filter='kaiser_fast')
+
+        # rate = 2 ** ((random()*2-1) * self.semitones / 12)
         # print(rate, x.shape)
-        x = resampy.resample(x, rate, 1, filter='kaiser_fast')
+        # x = resampy.resample(x, rate, 1, filter='kaiser_fast')
         # print(x.shape)
         return x
     
