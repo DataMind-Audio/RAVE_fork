@@ -53,46 +53,31 @@ class RandomGain(transforms.Transform):
         return x*gain
     
 class RandomEQ(transforms.Transform):
-    def __init__(self, sr, p_lp=0.75, p_bp=0.5, n_bp=2, p_ls=0.5):
+    def __init__(self, sr, p_lp=0.5, p_bp=0, n_bp=2, p_ls=0):
         """
         Random parametric EQ roughly simulating electric guitar 
         body+pickup resonances and tone control.
         Args:
             sr: audio sample rate
-            p_lp: probability of applying lowpass filter
+            p_lp: probability of applying HIGHPASS filter
             p_bp: probability of applying each bandpass filter
             n_pp: number of band filters
             p_ls: probability of applying low shelf filter
         """
         self.sr = sr
-        self.p_lp = p_lp
+        self.p_hp = p_lp
         self.p_bp = p_bp
         self.n_bp = n_bp
         self.p_ls = p_ls 
     def __call__(self, x: np.ndarray):
-        if bernoulli.rvs(self.p_lp):
+        if bernoulli.rvs(self.p_hp):
             # low pass ~ 80-20k Hz
-            f = 80 * 2 ** (8*random())
-            sos = butter(1, f, 'lp', fs=self.sr, output='sos')
+            f = 12 * 2 ** (7*random() + 1)
+            sos = butter(1, f, 'hp', fs=self.sr, output='sos')
             x = sosfilt(sos, x)
         if bernoulli.rvs(self.p_ls):
-            # low shelf ~ 40-640 Hz
-            f = 40 * 2 ** (4*random())
-            # gain is distributed as 1-sqrt(u)
-            # median of about -11db, 95% about -32db
-            w = np.random.rand()**0.5
-            sos = butter(1, f, 'lp', fs=self.sr, output='sos')
-            x = x - w*sosfilt(sos, x)
-        for _ in range(self.n_bp):
-            if bernoulli.rvs(self.p_bp):
-                # band ~ 160-5k Hz
-                f = 160 * 2 ** (5*random())
-                sos = butter(1, (f*2/3,f*3/2), 'bp', fs=self.sr, output='sos')
-                # gain between 0 and 3
-                # i.e. minimum -inf (notch), median 0db, max 9.5db
-                w = np.random.rand()**2 * 4 - 1
-                x = x + w*sosfilt(sos, x)
-        return x
+            pass
+        
 
 class RandomDelay(transforms.Transform):
     def __init__(self, max_delay:float=1024):
