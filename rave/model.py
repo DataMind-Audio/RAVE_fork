@@ -150,6 +150,7 @@ class RAVE(pl.LightningModule):
         self.weights = weights
 
         self.warmed_up = False
+        self.encoder.warmed_up = False # TODO(robin): this is weird and hacky, and needs to be sorted out properly
 
         # CONSTANTS
         self.sr = sampling_rate
