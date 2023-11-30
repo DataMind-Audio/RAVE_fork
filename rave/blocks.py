@@ -867,6 +867,7 @@ class SphericalEncoder(nn.Module):
         return norm_z, reg
 
     def set_warmed_up(self, state: bool):
+        self.warmed_up = state
         pass
 
     def forward(self, x: torch.Tensor):
