@@ -84,6 +84,8 @@ class RandomEQ(transforms.Transform):
             x = sosfilt(sos, x)
         if bernoulli.rvs(self.p_ls):
             pass
+
+        return x
         
 
 class RandomDelay(transforms.Transform):
