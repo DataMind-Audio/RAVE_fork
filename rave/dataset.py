@@ -30,7 +30,7 @@ class RandomSpeed(transforms.Transform):
         self.semitones = semitones
     def __call__(self, x: np.ndarray):
         # Only 50% of the time:
-        if np.random.randint(2):
+        if np.random.random() < 0.5:
             # calculate the rate of exactly +/- 1 semitone 
             rate = 2 ** ((np.random.randint(2)*2-1) * self.semitones / 12)
             # resample x
@@ -68,7 +68,7 @@ class RandomEQ(transforms.Transform):
             sr: audio sample rate
             p_lp: probability of applying HIGHPASS filter
             p_bp: probability of applying each bandpass filter
-            n_pp: number of band filters
+            n_bp: number of band filters
             p_ls: probability of applying low shelf filter
         """
         self.sr = sr
@@ -78,7 +78,7 @@ class RandomEQ(transforms.Transform):
         self.p_ls = p_ls 
     def __call__(self, x: np.ndarray):
         if bernoulli.rvs(self.p_hp):
-            # low pass ~ 80-20k Hz
+            # high pass ~ 80-20k Hz
             f = 12 * 2 ** (7*random() + 1)
             sos = butter(1, f, 'hp', fs=self.sr, output='sos')
             x = sosfilt(sos, x)
