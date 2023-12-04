@@ -22,12 +22,13 @@ from udls import transforms
 from udls.generated import AudioExample
 
 class RandomSpeed(transforms.Transform):
-    def __init__(self, semitones):
+    def __init__(self, semitones, n_signal):
         """place before RandomCrop, crop length must be sufficiently smaller than preprocessed length for given `semitones`
         Args:
             semitones: max transpose up and down
         """
         self.semitones = semitones
+        self.n_signal = n_signal
     def __call__(self, x: np.ndarray):
         # Only 50% of the time:
         if np.random.randint(2):
@@ -40,6 +41,12 @@ class RandomSpeed(transforms.Transform):
         # print(rate, x.shape)
         # x = resampy.resample(x, rate, 1, filter='kaiser_fast')
         # print(x.shape)
+
+        # pad if shorter than n_signal
+        if len(x) < self.n_signal:
+            x = np.concatenate([x, np.zeros(self.n_signal)], -1)
+            x = x[:self.n_signal]
+
         return x
     
 class RandomGain(transforms.Transform):
@@ -300,7 +307,7 @@ def get_dataset(db_path,
     transform_list = [lambda x: x.astype(np.float32)]
 
     if speed_semitones:
-        transform_list.append(RandomSpeed(speed_semitones))
+        transform_list.append(RandomSpeed(speed_semitones, n_signal))
 
     if delay_p:
         transform_list.append(transforms.RandomApply(
