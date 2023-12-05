@@ -398,7 +398,7 @@ class RAVE(pl.LightningModule):
     def decode(self, z):
 
         if self.noisy_latents:
-            z = self.add_noise(self, z)
+            z = self.add_noise(z)
 
         y = self.decoder(z)
         if self.pqmf is not None and self.enable_pqmf_decode:
