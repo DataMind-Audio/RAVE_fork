@@ -75,6 +75,9 @@ flags.DEFINE_float('ema',
 flags.DEFINE_bool('progress',
                   default=True,
                   help='Display training progress bar')
+flags.DEFINE_bool('noisy_latents',
+                  default=False,
+                  help='inject noise before the latent vector pre decoding')
 
 
 class EMA(pl.Callback):
@@ -133,7 +136,7 @@ def main(argv):
         FLAGS.override,
     )
 
-    model = rave.RAVE()
+    model = rave.RAVE(noisy_latents = FLAGS.noisy_latents)
 
     print(model)
 

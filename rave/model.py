@@ -120,6 +120,7 @@ class RAVE(pl.LightningModule):
         enable_pqmf_encode: bool = True,
         enable_pqmf_decode: bool = True,
         freeze_encoder: bool = True,
+        noisy_latents: bool = False,
     ):
         super().__init__()
 
@@ -130,6 +131,8 @@ class RAVE(pl.LightningModule):
         self.encoder = encoder()
         self.decoder = decoder()
         self.discriminator = discriminator()
+
+        self.noisy_latents = noisy_latents
 
         self.audio_distance = audio_distance()
         self.multiband_audio_distance = multiband_audio_distance()
@@ -393,10 +396,30 @@ class RAVE(pl.LightningModule):
         return self.encoder.params(self.encoder(x))
 
     def decode(self, z):
+
+        if self.noisy_latents:
+            z = add_noise(self, z)
+
         y = self.decoder(z)
         if self.pqmf is not None and self.enable_pqmf_decode:
             y = self.pqmf.inverse(y)
         return y
+
+    # ADDED BY ANDREAS - idea being to train the decoder to be more robust to various latents
+    def add_noise(self, z):
+        with torch.no_grad():
+            normalisation = torch.max(torch.abs(z))
+            if normalisation != 0:
+                z /= normalisation
+
+            z += (torch.rand_like(z) * 1e-5)
+
+            if normalisation !=0:
+                z *= normalisation
+
+        z.requires_grad_()
+
+        return z
 
     def forward(self, x):
         return self.decode(self.encode(x))
