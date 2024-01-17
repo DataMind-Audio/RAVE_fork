@@ -97,6 +97,7 @@ class ScriptedRAVE(nn_tilde.Module):
         self.register_buffer("latent_pca", pretrained.latent_pca)
         self.register_buffer("latent_mean", pretrained.latent_mean)
         self.register_buffer("fidelity", pretrained.fidelity)
+        self.register_buffer("receptive_field", pretrained.receptive_field) # NOTE(robin): to determine the model latency after export
 
         if isinstance(pretrained.encoder, rave.blocks.VariationalEncoder):
             if latent_size is None:
