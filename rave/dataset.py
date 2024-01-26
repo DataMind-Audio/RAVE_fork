@@ -85,7 +85,7 @@ class RandomEQ(transforms.Transform):
         self.p_ls = p_ls 
     def __call__(self, x: np.ndarray):
         if bernoulli.rvs(self.p_hp):
-            # low pass ~ 80-20k Hz
+            # high pass ~ 12 - 3k Hz
             f = 12 * 2 ** (7*random() + 1)
             sos = butter(1, f, 'hp', fs=self.sr, output='sos')
             x = sosfilt(sos, x)
